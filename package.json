@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension-boilerplate-react-vite",
+  "name": "Healthy Surf",
   "version": "0.2.2",
-  "description": "chrome extension boilerplate",
+  "description": "Hides negative and unpleasant content",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
     "prepare": "husky",
     "update-version": "run-script-os",
     "update-version:win32": "bash update_version.sh",
-    "update-version:default": "./update_version.sh"
+    "update-version:default": "./update_version.sh",
+    "setup-db": "ts-node packages/dev-utils/lib/database-manager/setupDatabase.ts"
   },
   "type": "module",
   "dependencies": {
@@ -35,6 +36,7 @@
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@types/sqlite3": "^3.1.11",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "autoprefixer": "^10.4.19",
@@ -53,12 +55,15 @@
     "postcss": "^8.4.38",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
+    "run-script-os": "^1.1.6",
+    "sql.js": "^1.11.0",
+    "sqlite3": "^5.1.7",
     "tailwindcss": "^3.4.6",
+    "ts-node": "^10.9.2",
     "tslib": "^2.6.3",
     "turbo": "^2.0.12",
     "typescript": "5.5.3",
-    "vite": "5.3.3",
-    "run-script-os": "^1.1.6"
+    "vite": "5.3.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

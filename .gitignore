@@ -21,3 +21,4 @@
 # compiled
 chrome-extension/public/manifest.json
 **/tailwind-output.css
+vite.config.mts.timestamp-*.mjs

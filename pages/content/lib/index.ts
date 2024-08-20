@@ -1,5 +1,4 @@
-import { toggleTheme } from '@lib/toggleTheme';
+import { HealthySurf } from './HealthySurf';
 
-console.log('content script loaded');
-
-void toggleTheme();
+const healthySurf = new HealthySurf();
+healthySurf.init();

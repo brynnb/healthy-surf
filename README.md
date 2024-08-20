@@ -1,38 +1,22 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/99cb6303-64e4-4bed-bf3f-35735353e6de" />
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/a5dbf71c-c509-4c4f-80f4-be88a1943b0a" />
-    <img alt="Logo" src="https://github.com/user-attachments/assets/99cb6303-64e4-4bed-bf3f-35735353e6de" />
-</picture>
-
+# Healthy Surf
 ![](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![](https://img.shields.io/badge/Typescript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![](https://badges.aleen42.com/src/vitejs.svg)
 
-![GitHub action badge](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/actions/workflows/build-zip.yml/badge.svg)
-![GitHub action badge](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/actions/workflows/lint.yml/badge.svg)
-
-<img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/Jonghakseo/chrome-extension-boilerplate-react-viteFactions&count_bg=%23#222222&title_bg=%23#454545&title=😀&edge_flat=true" alt="hits"/>
-<a href="https://discord.gg/Nu5Rf8xr" target="_blank"><img src="https://discord.com/api/guilds/1263404974830915637/widget.png"/></a>
-
-> This boilerplate
-> has [Legacy version](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/tree/legacy)
+<!-- ![GitHub action badge](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/actions/workflows/build-zip.yml/badge.svg)
+![GitHub action badge](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/actions/workflows/lint.yml/badge.svg) -->
 
 </div>
-
-> [!NOTE]
-> This project is listed in the [Awesome Vite](https://github.com/vitejs/awesome-vite)
-
-> [!TIP]
-> Share storage state between all pages
->
-> https://github.com/user-attachments/assets/3b8e189f-6443-490e-a455-4f9570267f8c
 
 ## Table of Contents
 
 - [Intro](#intro)
-- [Features](#features)
+- [Platforms Supported](#platforms-supported)
+- [Future Supported Platforms](#future-supported-platforms)
+- [To-Do](#to-do)
+- [Tools Used](#tools-used)
 - [Structure](#structure)
     - [ChromeExtension](#chrome-extension)
     - [Packages](#packages)
@@ -41,17 +25,39 @@
     - [Procedures](#procedures)
         - [Chrome](#chrome)
         - [Firefox](#firefox)
-- [Community](#community)
 - [Reference](#reference)
-- [Star History](#starhistory)
-- [Contributors](#contributors)
 
 ## Intro <a name="intro"></a>
 
-This boilerplate is made for creating chrome extensions using React and Typescript.
-> The focus was on improving the build speed and development experience with Vite(Rollup) & Turborepo.
+This is a web extension for all major supported browsers whose purpose is to hide unpleasant content on news and social media platforms. It is built on an [web extension boilerplate](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite?tab=readme-ov-file) that made my life much easier and much of this readme is a repeat of the original boilerplate readme. 
 
-## Features <a name="features"></a>
+## Platforms Supported  <a name="platforms-supported"></a>
+
+- Old Reddit: hides content on /r/all by default, option to enable hiding on any subreddit. Provides filtering by keyword and subreddit.
+- Youtube: hides content on any page with video thumbnails, hide Youtube's dismissable segments that breakup pages since Youtube ignores/resets the user's desire to close them on a weekly basis. Filtering based on video titles. 
+- X (Twitter): Filters sidebar content based on keywords
+
+## Future Supported Platforms <a name="future-supported-platforms"></a>
+
+- Tiktok
+- News sites
+- New reddit
+- Hacker news
+- Imgur maybe
+
+## To-Do <a name="to-do"></a>
+- Make sure IS_DEV_MODE type checking is properly false when built and instsalled 
+- Install sql and get keywords into database
+- Finish assigning categories to default JSON subreddits
+- Move entities to shared folder
+- Write tool to dump SQL to JSON file
+- Update keyword filtering from JSON (if dev mode/JSON is available, otherwise use API call to gist)
+- Add .env and .env.example
+- Update keyword filtering from gists (stored as JSON)
+- Dev script to update gist JSON via API from local sqlite store
+
+
+## Tools Used <a name="features"></a>
 
 - [React18](https://reactjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
@@ -65,16 +71,16 @@ This boilerplate is made for creating chrome extensions using React and Typescri
 
 ## Install <a name="install"></a>
 
-## Procedures: <a name="procedures"></a>
+### Procedures: <a name="procedures"></a>
 
 1. Clone this repository.
 2. Change `extensionDescription` and `extensionName` in `messages.json` file.
 3. Install pnpm globally: `npm install -g pnpm` (check your node version >= 18.12.0)
 4. Run `pnpm install`
 
-## And next, depending on the needs:
+### And next, depending on the needs:
 
-### For Chrome: <a name="chrome"></a>
+#### For Chrome: <a name="chrome"></a>
 
 1. Run:
     - Dev: `pnpm dev`
@@ -86,7 +92,7 @@ This boilerplate is made for creating chrome extensions using React and Typescri
 4. Find and Click - `Load unpacked extension`
 5. Select - `dist` folder at root
 
-### For Firefox: <a name="firefox"></a>
+#### For Firefox: <a name="firefox"></a>
 
 1. Run:
     - Dev: `pnpm dev:firefox`
@@ -95,7 +101,7 @@ This boilerplate is made for creating chrome extensions using React and Typescri
 3. Find and Click - `Load Temporary Add-on...`
 4. Select - `manifest.json` from `dist` folder at root
 
-### <i>Remember in firefox you add plugin in temporary mode, that's mean it's disappear after close browser, you must do it again, on next launch.</i>
+#### <i>Remember in firefox you add plugin in temporary mode, that's mean it's disappear after close browser, you must do it again, on next launch.</i>
 
 ## Structure <a name="structure"></a>
 
@@ -144,13 +150,6 @@ extension (`chrome_url_overrides.newtab` in manifest.json)
 - `side-panel` - [sidepanel(Chrome 114+)](https://developer.chrome.com/docs/extensions/reference/sidePanel/) for chrome
   extension (`side_panel.default_path` in manifest.json)
 
-## Community <a name="community"></a>
-
-To chat with other community members, you can join the [Discord](https://discord.gg/Nu5Rf8xr) server.
-You can ask questions on that server, and you can also help others.
-
-Also, suggest new features or share any challenges you've faced while developing Chrome extensions!
-
 ## Reference <a name="reference"></a>
 
 - [Vite Plugin](https://vitejs.dev/guide/api-plugin.html)
@@ -158,32 +157,3 @@ Also, suggest new features or share any challenges you've faced while developing
 - [Rollup](https://rollupjs.org/guide/en/)
 - [Turborepo](https://turbo.build/repo/docs)
 - [Rollup-plugin-chrome-extension](https://www.extend-chrome.dev/rollup-plugin)
-
-## Star History <a name="starhistory"></a>
-
-<a href="https://star-history.com/#Jonghakseo/chrome-extension-boilerplate-react-vite&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Jonghakseo/chrome-extension-boilerplate-react-vite&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Jonghakseo/chrome-extension-boilerplate-react-vite&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Jonghakseo/chrome-extension-boilerplate-react-vite&type=Date" />
- </picture>
-</a>
-
-## Contributors <a name="contributors"></a>
-
-This Boilerplate is made possible thanks to all of its contributors.
-
-<a href="https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/graphs/contributors">
-  <img width="500px" src="https://contrib.rocks/image?repo=Jonghakseo/chrome-extension-boilerplate-react-vite" alt="All Contributors"/>
-</a>
-
----
-
-## Special Thanks To
-
-| <a href="https://jb.gg/OpenSourceSupport"><img width="40" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo."></a> | <a href="https://www.linkedin.com/in/j-acks0n"><img width="40" style="border-radius:50%" src='https://avatars.githubusercontent.com/u/23139754' alt='Jackson Hong'/></a> |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-
----
-
-Made by [Jonghakseo](https://jonghakseo.github.io/)
