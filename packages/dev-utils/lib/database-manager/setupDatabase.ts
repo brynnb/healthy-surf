@@ -27,13 +27,13 @@ function setupDatabase() {
   });
 
   db.serialize(() => {
-    // Create keywords_default table
+    // Create keywords table
     db.run(`
-      CREATE TABLE IF NOT EXISTS keywords_default (
+      CREATE TABLE IF NOT EXISTS keywords (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         keyword TEXT NOT NULL,
-        is_enabled BOOLEAN DEFAULT 1,
-        is_case_sensitive BOOLEAN DEFAULT 0,
+        is_default BOOLEAN DEFAULT 0,
+        is_case_sensitive BOOLEAN NOT NULL DEFAULT 0,
         date_created TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -51,7 +51,7 @@ function setupDatabase() {
       CREATE TABLE IF NOT EXISTS keyword_category (
         keyword_id INTEGER,
         category_id INTEGER,
-        FOREIGN KEY (keyword_id) REFERENCES keywords_default(id),
+        FOREIGN KEY (keyword_id) REFERENCES keywords(id),
         FOREIGN KEY (category_id) REFERENCES category(id)
       )
     `);
@@ -61,7 +61,6 @@ function setupDatabase() {
       CREATE TABLE IF NOT EXISTS blocked_subreddits (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        is_case_sensitive BOOLEAN DEFAULT 0,
         date_created TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -79,17 +78,19 @@ function setupDatabase() {
     // Read initial keywords from JSON file
     const data = JSON.parse(fs.readFileSync('./default_blocked_items.json', 'utf8'));
     const initialKeywords = data.blocked_keywords;
-
-    const insertKeywordStmt = db.prepare('INSERT INTO keywords_default (keyword) VALUES (?)');
+    const insertKeywordStmt = db.prepare(
+      'INSERT INTO keywords (keyword, is_case_sensitive, is_default) VALUES (?, ?, true)',
+    );
     const insertKeywordCategoryStmt = db.prepare(
       'INSERT INTO keyword_category (keyword_id, category_id) VALUES (?, ?)',
     );
 
+    //was having issues with async and db connections finalizing too early so this a janky solution to quickly fix. if this was more than a dev tool that i alone would ever use i'd probably properly fix it.
     let pendingOperations = 0;
-
     for (const item of initialKeywords) {
       pendingOperations++;
-      insertKeywordStmt.run(item.keyword, function (err: Error | null) {
+      const isCaseSensitive = item.is_case_sensitive !== undefined ? item.is_case_sensitive : false;
+      insertKeywordStmt.run(item.keyword, isCaseSensitive, function (this: { lastID: number }, err: Error | null) {
         if (err) {
           console.error(err.message);
           return;
@@ -115,7 +116,7 @@ function setupDatabase() {
     }
 
     // Insert initial categories
-    const initialCategories = ['Politics', 'Violence', 'Social Issues', 'Mean Stuff', 'Unpleasant News'];
+    const initialCategories = ['Politics', 'Violence', 'Social Issues', 'Mean Stuff', 'Unpleasant'];
     const insertCategoryStmt = db.prepare('INSERT INTO category (name) VALUES (?)');
 
     for (const category of initialCategories) {
@@ -177,7 +178,7 @@ function setupDatabase() {
         if (err) {
           console.error(err.message);
         }
-        console.log('Closed the database connection.');
+        console.log('Closed the database connection. Database setup is complete.');
       });
     }
 

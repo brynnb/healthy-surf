@@ -102,7 +102,7 @@
         {"keyword": "hillary clinton", "category_ids": [1]},
         {"keyword": "bill clinton", "category_ids": [1]},
         {"keyword": "Alexandria Ocasio-Cortez", "category_ids": [1]},
-        {"keyword": "AOC", "category_ids": [1]},
+        {"keyword": "AOC", "category_ids": [1], "is_case_sensitive": true},
         {"keyword": "candace owens", "category_ids": [1]},
         {"keyword": "obama", "category_ids": [1]},
         {"keyword": "under investigation", "category_ids": [5]},
@@ -172,7 +172,7 @@
         {"keyword": "christian right", "category_ids": [1, 3]},
         {"keyword": "confederate", "category_ids": [1, 3]},
         {"keyword": "abortion", "category_ids": [1]},
-        {"keyword": "MAGA", "category_ids": [1]},
+        {"keyword": "MAGA", "category_ids": [1], "is_case_sensitive": true},
         {"keyword": "hate crime", "category_ids": [3]},
         {"keyword": "mcconnell", "category_ids": [1]},
         {"keyword": "filibuster", "category_ids": [1]}

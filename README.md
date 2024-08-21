@@ -46,7 +46,6 @@ This is a web extension for all major supported browsers whose purpose is to hid
 - Imgur maybe
 
 ## To-Do <a name="to-do"></a>
-- Make sure IS_DEV_MODE type checking is properly false when built and instsalled 
 - Install sql and get keywords into database
 - Finish assigning categories to default JSON subreddits
 - Move entities to shared folder
@@ -55,6 +54,8 @@ This is a web extension for all major supported browsers whose purpose is to hid
 - Add .env and .env.example
 - Update keyword filtering from gists (stored as JSON)
 - Dev script to update gist JSON via API from local sqlite store
+- Make sure IS_DEV_MODE type checking is properly false when built and instsalled 
+
 
 
 ## Tools Used <a name="features"></a>
@@ -71,12 +72,13 @@ This is a web extension for all major supported browsers whose purpose is to hid
 
 ## Install <a name="install"></a>
 
-### Procedures: <a name="procedures"></a>
+### Dev: <a name="procedures"></a>
 
-1. Clone this repository.
-2. Change `extensionDescription` and `extensionName` in `messages.json` file.
+1. Clone repository
+2. Change `extensionDescription` and `extensionName` in `messages.json` file
 3. Install pnpm globally: `npm install -g pnpm` (check your node version >= 18.12.0)
 4. Run `pnpm install`
+5. Run `pnpm run setup-db` to create the local sqlite database if needing to do updates to default data. Include the `--delete` flag if you want it to wipe the current database before running again (if there are structural changes etc).
 
 ### And next, depending on the needs:
 
@@ -101,7 +103,7 @@ This is a web extension for all major supported browsers whose purpose is to hid
 3. Find and Click - `Load Temporary Add-on...`
 4. Select - `manifest.json` from `dist` folder at root
 
-#### <i>Remember in firefox you add plugin in temporary mode, that's mean it's disappear after close browser, you must do it again, on next launch.</i>
+#### <i>Note: Firefox plugins are added in temporary mode and are removed after closing the browser and must be added again when re-opened.</i>
 
 ## Structure <a name="structure"></a>
 
@@ -157,3 +159,8 @@ extension (`chrome_url_overrides.newtab` in manifest.json)
 - [Rollup](https://rollupjs.org/guide/en/)
 - [Turborepo](https://turbo.build/repo/docs)
 - [Rollup-plugin-chrome-extension](https://www.extend-chrome.dev/rollup-plugin)
+
+
+## Disclaimer
+
+This project filters content based on an extensive list of keywords. This list of keywords and their assortment into categories is not a condemenation of any particular keyword or topic related to that keyword, and especially so in that much of the categorization was done automatically with an LLM. It is my hope that no one "reads into" the inclusion of any keywords or the categorization of a keyword. The process of filtering based on sometimes sensitive words is a delicate situation and it is not my intention to offend or exclude any important topics or groups of people from general discourse and freedoms of speech. This project may also contain keywords and categories from outside sources, and these sources may not be very thoroughly reviewed before inclusion. 
