@@ -29,12 +29,12 @@
 
 ## Intro <a name="intro"></a>
 
-This is a web extension for all major supported browsers whose purpose is to hide unpleasant content on news and social media platforms. It is built on an [web extension boilerplate](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite?tab=readme-ov-file) that made my life much easier and much of this readme is a repeat of the original boilerplate readme. 
+This is a web extension for all major browsers whose purpose is to hide unpleasant or unwanted content on social media platforms and other websites.
 
 ## Platforms Supported  <a name="platforms-supported"></a>
 
 - Old Reddit: hides content on /r/all by default, option to enable hiding on any subreddit. Provides filtering by keyword and subreddit.
-- Youtube: hides content on any page with video thumbnails, hide Youtube's dismissable segments that breakup pages since Youtube ignores/resets the user's desire to close them on a weekly basis. Filtering based on video titles. 
+- Youtube: hides content on any page with video thumbnails, hide Youtube's dismissable segments that breakup pages since Youtube ignores/resets the user's desire to close them on a weekly basis. Filtering based on video titles. Also filters comment sections under videos.
 - X (Twitter): Filters sidebar content based on keywords
 
 ## Future Supported Platforms <a name="future-supported-platforms"></a>
@@ -46,17 +46,38 @@ This is a web extension for all major supported browsers whose purpose is to hid
 - Imgur maybe
 
 ## To-Do <a name="to-do"></a>
-- Install sql and get keywords into database
-- Finish assigning categories to default JSON subreddits
+
+#### General
+
+- Add UI in extension popup to add keywords, add categories, assign keywords to categories, dev-only button to save to sqlite, on-off toggle
+- Update code so that toggling off extension shows all previously hidden content. Ensure toggling on re-hides without page reload.
+- Add filtering for usernames on platform-specific basis; Add tagging for username filtering (so that sharing filtering lists on shared preferences can work)
+- Add UI for adding usernames, extension to detect which website you're on to auto-associate it the platform. 
 - Move entities to shared folder
-- Write tool to dump SQL to JSON file
-- Update keyword filtering from JSON (if dev mode/JSON is available, otherwise use API call to gist)
-- Add .env and .env.example
-- Update keyword filtering from gists (stored as JSON)
-- Dev script to update gist JSON via API from local sqlite store
+
+#### Before First Release
+- Add .env and .env.example - needed for github API access for updating gists
+- Finish assigning categories to default JSON subreddits
 - Make sure IS_DEV_MODE type checking is properly false when built and instsalled 
 
+#### Keeping filtering lists up-to-date
+- Update keyword filtering from gists (stored as JSON)
+- Update keyword filtering from JSON (if dev mode/JSON is available, otherwise use API call to gist)
+- Write tool to dump SQL to JSON file if going with approach to store JSON on a gist for continual updates
+- Dev script to update gist JSON via API from local sqlite store
 
+
+#### Platform Specific
+- Add toggle for filtering while viewing specific subreddit or only on /r/all
+- Ensure filtering works for "cross-posts", in that the filtering is also applied to the origin subreddit and origin title
+- Fix Youtube commenting filtering - it removes entire tree parent comment tree when a single child comment hits a filter
+- X/Twitter: add filtering for any crypto stuff
+- Remove "members only" youtube videos
+
+
+## Notes
+
+- I am using sqlite for development purposes because managing default data that ships with the extension is easier here than the WebExtensions Storage API. The extension will load sqlite database data to the WebExtensions Storage API when installed and then operate from there.
 
 ## Tools Used <a name="features"></a>
 
@@ -163,4 +184,6 @@ extension (`chrome_url_overrides.newtab` in manifest.json)
 
 ## Disclaimer
 
-This project filters content based on an extensive list of keywords. This list of keywords and their assortment into categories is not a condemenation of any particular keyword or topic related to that keyword, and especially so in that much of the categorization was done automatically with an LLM. It is my hope that no one "reads into" the inclusion of any keywords or the categorization of a keyword. The process of filtering based on sometimes sensitive words is a delicate situation and it is not my intention to offend or exclude any important topics or groups of people from general discourse and freedoms of speech. This project may also contain keywords and categories from outside sources, and these sources may not be very thoroughly reviewed before inclusion. 
+This project filters content based on an extensive list of keywords. This list of keywords and their assortment into categories is not a condemenation of any particular keyword or topic related to that keyword, and especially so in that much of the categorization was done automatically with an LLM. It is my hope that no one reads into the inclusion of any keywords or the categorization of a keyword. The process of filtering based on sometimes sensitive words is a delicate situation and it is not my intention to offend or exclude any important topics or groups of people from general discourse and freedoms of speech. This project may also contain keywords and categories from outside sources, and these sources may not be very thoroughly reviewed before inclusion. Viewing the list of filtered keywords contains language not safe for work. 
+
+This extension is built from a [web extension boilerplate](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite?tab=readme-ov-file) with credit and thanks to them for excellent work!

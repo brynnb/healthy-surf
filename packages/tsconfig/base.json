@@ -18,10 +18,10 @@
     "resolveJsonModule": true,
     "noImplicitReturns": true,
     "jsx": "react-jsx",
+    "noUnusedLocals": false,
     "lib": [
       "DOM",
       "ESNext"
     ]
   }
 }
-
