@@ -1,5 +1,7 @@
 import sqlite3 from 'sqlite3';
 import fs from 'fs';
+import { loadFromSQLite } from '@extension/storage/lib/sqliteHelper';
+import { keywordsStorage } from '@extension/storage';
 
 // Function to delete the existing database file
 function deleteDatabase(dbPath: string) {
@@ -7,6 +9,11 @@ function deleteDatabase(dbPath: string) {
     fs.unlinkSync(dbPath);
     console.log('Existing database deleted.');
   }
+}
+
+async function loadInitialKeywords() {
+  const initialKeywords = await loadFromSQLite('keywords');
+  keywordsStorage.set(initialKeywords);
 }
 
 function setupDatabase() {
@@ -26,7 +33,7 @@ function setupDatabase() {
     console.log('Connected to the blockedKeywords database.');
   });
 
-  db.serialize(() => {
+  db.serialize(async () => {
     // Create keywords table
     db.run(`
       CREATE TABLE IF NOT EXISTS keywords (
@@ -74,6 +81,9 @@ function setupDatabase() {
         FOREIGN KEY (category_id) REFERENCES category(id)
       )
     `);
+
+    // Load initial keywords from SQLite
+    await loadInitialKeywords();
 
     // Read initial keywords from JSON file
     const data = JSON.parse(fs.readFileSync('./default_blocked_items.json', 'utf8'));

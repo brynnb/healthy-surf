@@ -7,7 +7,7 @@ const Popup = () => {
   const theme = useStorageSuspense(exampleThemeStorage);
   const isLight = theme === 'light';
 
-  const { keywords, addKeyword, removeKeyword } = useKeywords();
+  const { keywords, addKeyword, removeKeyword, clearLocalStorage, loadKeywordsFromSQLite } = useKeywords();
 
   const handleAddKeyword = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -17,6 +17,10 @@ const Popup = () => {
       addKeyword(input.value.trim());
       form.reset();
     }
+  };
+
+  const handleLoadFromSQLite = async () => {
+    await loadKeywordsFromSQLite();
   };
 
   return (
@@ -31,6 +35,12 @@ const Popup = () => {
             Add
           </button>
         </form>
+        <button onClick={clearLocalStorage} className="mt-2 text-red-500 hover:text-red-700">
+          Clear Local Storage
+        </button>
+        <button onClick={handleLoadFromSQLite} className="mt-2 text-blue-500 hover:text-blue-700">
+          Load Keywords from SQLite
+        </button>
         <div className="mt-4">
           <h2>Keywords:</h2>
           <ul>
@@ -44,26 +54,25 @@ const Popup = () => {
             ))}
           </ul>
         </div>
-        <ToggleButton>Toggle light/dark mode</ToggleButton>
       </header>
     </div>
   );
 };
 
-const ToggleButton = (props: ComponentPropsWithoutRef<'button'>) => {
-  const theme = useStorageSuspense(exampleThemeStorage);
-  return (
-    <button
-      className={
-        props.className +
-        ' ' +
-        'font-bold mt-4 py-1 px-4 rounded shadow hover:scale-105 ' +
-        (theme === 'light' ? 'bg-white text-black shadow-black' : 'bg-black text-white')
-      }
-      onClick={exampleThemeStorage.toggle}>
-      {props.children}
-    </button>
-  );
-};
+// const ToggleButton = (props: ComponentPropsWithoutRef<'button'>) => {
+//   const theme = useStorageSuspense(exampleThemeStorage);
+//   return (
+//     <button
+//       className={
+//         props.className +
+//         ' ' +
+//         'font-bold mt-4 py-1 px-4 rounded shadow hover:scale-105 ' +
+//         (theme === 'light' ? 'bg-white text-black shadow-black' : 'bg-black text-white')
+//       }
+//       onClick={exampleThemeStorage.toggle}>
+//       {props.children}
+//     </button>
+//   );
+// };
 
 export default withErrorBoundary(withSuspense(Popup, <div> Loading ... </div>), <div> Error Occur </div>);
