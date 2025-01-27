@@ -16,6 +16,10 @@ export default defineConfig({
       '@lib': libDir,
       '@assets': resolve(libDir, 'assets'),
     },
+    dedupe: ['@extension/dev-utils', '@extension/ui'],
+  },
+  optimizeDeps: {
+    include: ['@extension/dev-utils', '@extension/ui'],
   },
   plugins: [
     libAssetsPlugin({
@@ -40,7 +44,7 @@ export default defineConfig({
     reportCompressedSize: isProduction,
     watch: watchOption,
     rollupOptions: {
-      external: ['chrome'],
+      external: ['chrome', '@extension/dev-utils', '@extension/ui'],
     },
   },
 });

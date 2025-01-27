@@ -1,2 +1,2 @@
-export * from './useStorage';
-export * from './useKeywords';
+export { useStorageSuspense, useStorage } from './useStorage';
+export { useKeywords } from './useKeywords';

@@ -7,11 +7,19 @@
   "files": [
     "dist/**"
   ],
-  "types": "index.ts",
+  "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
     "clean": "rimraf ./dist",
-    "ready": "node build.mjs",
+    "build": "pnpm clean && tsc",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "pnpm lint --fix",
     "prettier": "prettier . --write --ignore-path ../../.prettierignore",

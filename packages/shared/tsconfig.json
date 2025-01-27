@@ -1,10 +1,13 @@
 {
-  "extends": "@extension/tsconfig/utils",
+  "extends": "@extension/tsconfig/base.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
-    "types": ["chrome"]
+    "noEmit": false,
+    "module": "ESNext"
   },
-  "include": ["index.ts", "lib"]
+  "include": ["."],
+  "exclude": ["dist", "build", "node_modules"]
 }

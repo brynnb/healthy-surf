@@ -8,11 +8,19 @@
   "files": [
     "dist/**"
   ],
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
     "clean": "rimraf ./dist && rimraf ./build",
+    "build": "pnpm clean && tsc",
     "ready": "tsc",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "pnpm lint --fix",
@@ -33,6 +41,7 @@
   "devDependencies": {
     "@extension/tsconfig": "workspace:*",
     "@jest/globals": "^29.7.0",
+    "@types/chrome": "^0.0.268",
     "@types/jest": "^29.5.12",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^20.11.24",

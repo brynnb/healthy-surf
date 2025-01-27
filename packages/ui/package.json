@@ -13,6 +13,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "clean": "rimraf ./dist && rimraf .turbo",
+    "build": "pnpm clean && pnpm ready && tsc",
     "ready": "node build.mjs",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "pnpm lint --fix",

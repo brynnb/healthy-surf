@@ -188,6 +188,9 @@ importers:
       '@jest/globals':
         specifier: ^29.7.0
         version: 29.7.0
+      '@types/chrome':
+        specifier: ^0.0.268
+        version: 0.0.268
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.14

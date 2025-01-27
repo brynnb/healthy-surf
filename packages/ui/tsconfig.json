@@ -1,8 +1,12 @@
 {
   "extends": "@extension/tsconfig/utils",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
     "jsx": "react-jsx",
+    "noEmit": false,
+    "module": "ESNext",
     "baseUrl": ".",
     "types": ["chrome"]
   },

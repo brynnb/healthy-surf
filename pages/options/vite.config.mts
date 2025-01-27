@@ -9,6 +9,7 @@ export default withPageConfig({
     alias: {
       '@src': srcDir,
     },
+    preserveSymlinks: true,
   },
   publicDir: resolve(rootDir, 'public'),
   build: {

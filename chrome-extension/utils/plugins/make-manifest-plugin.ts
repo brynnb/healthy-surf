@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { ManifestParser, colorLog } from '@extension/dev-utils';
 import type { PluginOption } from 'vite';
 import { pathToFileURL } from 'url';
 import * as process from 'process';
@@ -9,6 +8,40 @@ const { resolve } = path;
 
 const rootDir = resolve(__dirname, '..', '..');
 const manifestFile = resolve(rootDir, 'manifest.js');
+
+function colorLog(message: string, type: 'success' | 'info' | 'error' | 'warning' = 'info') {
+  const colors = {
+    success: '\x1b[32m',
+    info: '\x1b[34m',
+    error: '\x1b[31m',
+    warning: '\x1b[33m',
+  };
+
+  const color = colors[type];
+  console.log(`${color}%s\x1b[0m`, message);
+}
+
+function convertManifestToString(manifest: chrome.runtime.ManifestV3, platform: 'chrome' | 'firefox'): string {
+  if (platform === 'firefox') {
+    const manifestCopy = { ...manifest };
+    if (manifestCopy.background?.service_worker) {
+      const serviceWorker = manifestCopy.background.service_worker;
+      const { background, ...rest } = manifestCopy;
+      return JSON.stringify(
+        {
+          ...rest,
+          background: {
+            type: 'module',
+            scripts: [serviceWorker],
+          } as any, // Firefox has a different manifest type
+        },
+        null,
+        2,
+      );
+    }
+  }
+  return JSON.stringify(manifest, null, 2);
+}
 
 const getManifestWithCacheBurst = (): Promise<{ default: chrome.runtime.ManifestV3 }> => {
   const withCacheBurst = (path: string) => `${path}?${Date.now().toString()}`;
@@ -30,7 +63,7 @@ export default function makeManifestPlugin(config: { outDir: string }): PluginOp
     const manifestPath = resolve(to, 'manifest.json');
 
     const isFirefox = process.env.__FIREFOX__ === 'true';
-    fs.writeFileSync(manifestPath, ManifestParser.convertManifestToString(manifest, isFirefox ? 'firefox' : 'chrome'));
+    fs.writeFileSync(manifestPath, convertManifestToString(manifest, isFirefox ? 'firefox' : 'chrome'));
 
     colorLog(`Manifest file copy complete: ${manifestPath}`, 'success');
   }

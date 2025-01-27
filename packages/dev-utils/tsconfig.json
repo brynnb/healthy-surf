@@ -1,14 +1,17 @@
 {
   "extends": "@extension/tsconfig/base.json",
   "compilerOptions": {
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "chrome"],
     "outDir": "./dist",
     "rootDir": ".",
     "module": "ESNext",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true
   },
   "include": [
     "lib/**/*",
-    "__tests__/**/*"
+    "__tests__/**/*",
+    "index.ts"
   ]
 }

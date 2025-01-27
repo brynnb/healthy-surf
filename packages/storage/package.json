@@ -8,7 +8,15 @@
     "dist/**"
   ],
   "main": "./dist/index.js",
-  "types": "index.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
     "clean": "rimraf ./dist",
     "ready": "node build.mjs",
