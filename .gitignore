@@ -12,6 +12,7 @@
 # env
 **/.env.local
 **/.env
+.env.*.local
 
 # etc
 .DS_Store

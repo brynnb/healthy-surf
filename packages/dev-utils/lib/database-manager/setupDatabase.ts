@@ -1,4 +1,4 @@
-import sqlite3 from 'sqlite3';
+import { Database } from 'sqlite3';
 import fs from 'fs';
 
 // Function to delete the existing database file
@@ -18,7 +18,7 @@ function setupDatabase() {
     deleteDatabase(dbPath);
   }
 
-  const db = new sqlite3.Database(dbPath, err => {
+  const db = new Database(dbPath, err => {
     if (err) {
       console.error(err.message);
       return;
@@ -72,6 +72,17 @@ function setupDatabase() {
         category_id INTEGER,
         FOREIGN KEY (subreddit_id) REFERENCES blocked_subreddits(id),
         FOREIGN KEY (category_id) REFERENCES category(id)
+      )
+    `);
+
+    // Add content analysis table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS content_analysis (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_url TEXT NOT NULL,
+        categories TEXT NOT NULL,
+        tags TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
 

@@ -1,8 +1,14 @@
 {
-  "extends": "@extension/tsconfig/utils",
+  "extends": "@extension/tsconfig/base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "types": ["chrome"]
+    "types": ["node", "jest"],
+    "outDir": "./dist",
+    "rootDir": ".",
+    "module": "ESNext",
+    "moduleResolution": "node"
   },
-  "include": ["index.ts", "lib"]
+  "include": [
+    "lib/**/*",
+    "__tests__/**/*"
+  ]
 }

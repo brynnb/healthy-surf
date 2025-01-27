@@ -1,67 +1,17 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "ui": "tui",
   "tasks": {
-    "ready": {
-      "outputs": [
-        "dist/**",
-        "build/**"
-      ]
-    },
-    "dev": {
-      "dependsOn": [
-        "ready"
-      ],
-      "outputs": [
-        "dist/**",
-        "build/**"
-      ],
-      "env": [
-        "__FIREFOX__"
-      ],
-      "persistent": true
+    "test": {
+      "outputs": [],
+      "cache": false
     },
     "build": {
-      "dependsOn": [
-        "^build",
-        "ready"
-      ],
-      "env": [
-        "__FIREFOX__"
-      ],
-      "outputs": [
-        "../../dist/**",
-        "dist/**",
-        "build/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
     },
-    "zip": {
-      "dependsOn": [
-        "^build"
-      ],
-      "cache": false
-    },
-    "type-check": {
-      "cache": false
-    },
-    "lint": {
-      "cache": false
-    },
-    "lint:fix": {
-      "cache": false
-    },
-    "prettier": {
-      "cache": false
-    },
-    "test": {
-      "dependsOn": [
-        "^test",
-        "^build"
-      ],
-      "cache": false
-    },
-    "clean": {
-      "cache": false
+    "dev": {
+      "cache": false,
+      "persistent": true
     }
   }
 }
