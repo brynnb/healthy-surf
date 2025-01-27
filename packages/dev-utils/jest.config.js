@@ -11,7 +11,7 @@ export default {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!(openai)/)'],
+  transformIgnorePatterns: ['node_modules/(?!(openai|node-fetch)/)'],
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',

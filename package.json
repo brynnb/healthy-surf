@@ -24,7 +24,7 @@
     "update-version": "run-script-os",
     "update-version:win32": "bash update_version.sh",
     "update-version:default": "./update_version.sh",
-    "setup-db": "ts-node packages/dev-utils/lib/database-manager/setupDatabase.ts"
+    "setup-db": "tsx packages/dev-utils/lib/database-manager/setupDatabase.ts"
   },
   "type": "module",
   "dependencies": {
@@ -61,6 +61,7 @@
     "tailwindcss": "^3.4.6",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.3",
+    "tsx": "^4.16.2",
     "turbo": "^2.0.12",
     "typescript": "5.5.3",
     "vite": "5.3.3",

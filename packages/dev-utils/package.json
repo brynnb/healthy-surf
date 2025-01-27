@@ -23,6 +23,7 @@
     "setup-db": "ts-node lib/database-manager/setupDatabase.ts"
   },
   "dependencies": {
+    "axios": "^1.7.9",
     "dotenv": "^16.0.0",
     "jsdom": "^24.0.0",
     "node-fetch": "^3.3.0",

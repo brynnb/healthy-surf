@@ -1,4 +1,4 @@
-import { Database } from 'sqlite3';
+import sqlite3 from 'sqlite3';
 import fs from 'fs';
 
 // Function to delete the existing database file
@@ -18,13 +18,39 @@ function setupDatabase() {
     deleteDatabase(dbPath);
   }
 
-  const db = new Database(dbPath, err => {
+  const db = new sqlite3.Database(dbPath, err => {
     if (err) {
       console.error(err.message);
       return;
     }
     console.log('Connected to the blockedKeywords database.');
   });
+
+  // Track all prepared statements
+  const statements: sqlite3.Statement[] = [];
+  let pendingOperations = 0;
+  let tablesChecked = 0;
+  const TOTAL_TABLES = 3; // keywords, category, and blocked_subreddits
+
+  function checkAndFinalize() {
+    if (pendingOperations === 0 && tablesChecked === TOTAL_TABLES) {
+      // Finalize all prepared statements
+      statements.forEach(stmt => {
+        stmt.finalize(err => {
+          if (err) {
+            console.error(err.message);
+          }
+        });
+      });
+
+      db.close((err: Error | null) => {
+        if (err) {
+          console.error(err.message);
+        }
+        console.log('Closed the database connection. Database setup is complete.');
+      });
+    }
+  }
 
   db.serialize(() => {
     // Create keywords table
@@ -86,116 +112,123 @@ function setupDatabase() {
       )
     `);
 
-    // Read initial keywords from JSON file
-    const data = JSON.parse(fs.readFileSync('./default_blocked_items.json', 'utf8'));
-    const initialKeywords = data.blocked_keywords;
-    const insertKeywordStmt = db.prepare(
-      'INSERT INTO keywords (keyword, is_case_sensitive, is_default) VALUES (?, ?, true)',
-    );
-    const insertKeywordCategoryStmt = db.prepare(
-      'INSERT INTO keyword_category (keyword_id, category_id) VALUES (?, ?)',
-    );
+    // Check if keywords table is empty before seeding
+    db.get('SELECT COUNT(*) as count FROM keywords', (err, row: { count: number }) => {
+      if (err) {
+        console.error(err.message);
+        tablesChecked++;
+        checkAndFinalize();
+        return;
+      }
 
-    //was having issues with async and db connections finalizing too early so this a janky solution to quickly fix. if this was more than a dev tool that i alone would ever use i'd probably properly fix it.
-    let pendingOperations = 0;
-    for (const item of initialKeywords) {
-      pendingOperations++;
-      const isCaseSensitive = item.is_case_sensitive !== undefined ? item.is_case_sensitive : false;
-      insertKeywordStmt.run(item.keyword, isCaseSensitive, function (this: { lastID: number }, err: Error | null) {
-        if (err) {
-          console.error(err.message);
-          return;
+      if (row.count === 0) {
+        try {
+          // Read initial keywords from JSON file
+          const data = JSON.parse(fs.readFileSync('./default_blocked_items.json', 'utf8'));
+          const initialKeywords = data.blocked_keywords;
+          const insertKeywordStmt = db.prepare(
+            'INSERT INTO keywords (keyword, is_case_sensitive, is_default) VALUES (?, ?, true)',
+          );
+          const insertKeywordCategoryStmt = db.prepare(
+            'INSERT INTO keyword_category (keyword_id, category_id) VALUES (?, ?)',
+          );
+
+          statements.push(insertKeywordStmt, insertKeywordCategoryStmt);
+
+          for (const item of initialKeywords) {
+            pendingOperations++;
+            const isCaseSensitive = item.is_case_sensitive !== undefined ? item.is_case_sensitive : false;
+            insertKeywordStmt.run(
+              item.keyword,
+              isCaseSensitive,
+              function (this: { lastID: number }, err: Error | null) {
+                if (err) {
+                  console.error(err.message);
+                  pendingOperations--;
+                  checkAndFinalize();
+                  return;
+                }
+                const keywordId = this.lastID;
+                for (const categoryId of item.category_ids) {
+                  pendingOperations++;
+                  insertKeywordCategoryStmt.run(keywordId, categoryId, (err: Error | null) => {
+                    if (err) {
+                      console.error(err.message);
+                    }
+                    pendingOperations--;
+                    checkAndFinalize();
+                  });
+                }
+                pendingOperations--;
+                checkAndFinalize();
+              },
+            );
+          }
+        } catch (error) {
+          console.error('Error reading or parsing default_blocked_items.json:', error);
         }
-        const keywordId = this.lastID;
-        for (const categoryId of item.category_ids) {
+      }
+      tablesChecked++;
+      checkAndFinalize();
+    });
+
+    // Check if category table is empty before seeding
+    db.get('SELECT COUNT(*) as count FROM category', (err, row: { count: number }) => {
+      if (err) {
+        console.error(err.message);
+        tablesChecked++;
+        checkAndFinalize();
+        return;
+      }
+
+      if (row.count === 0) {
+        const initialCategories = ['Politics', 'Violence', 'Social Issues', 'Mean Stuff', 'Unpleasant'];
+        const insertCategoryStmt = db.prepare('INSERT INTO category (name) VALUES (?)');
+        statements.push(insertCategoryStmt);
+
+        for (const category of initialCategories) {
           pendingOperations++;
-          insertKeywordCategoryStmt.run(keywordId, categoryId, (err: Error | null) => {
+          insertCategoryStmt.run(category, (err: Error | null) => {
             if (err) {
               console.error(err.message);
             }
             pendingOperations--;
-            if (pendingOperations === 0) {
-              finalizeStatements();
-            }
+            checkAndFinalize();
           });
         }
-        pendingOperations--;
-        if (pendingOperations === 0) {
-          finalizeStatements();
-        }
-      });
-    }
+      }
+      tablesChecked++;
+      checkAndFinalize();
+    });
 
-    // Insert initial categories
-    const initialCategories = ['Politics', 'Violence', 'Social Issues', 'Mean Stuff', 'Unpleasant'];
-    const insertCategoryStmt = db.prepare('INSERT INTO category (name) VALUES (?)');
+    // Check if blocked_subreddits table is empty before seeding
+    db.get('SELECT COUNT(*) as count FROM blocked_subreddits', (err, row: { count: number }) => {
+      if (err) {
+        console.error(err.message);
+        tablesChecked++;
+        checkAndFinalize();
+        return;
+      }
 
-    for (const category of initialCategories) {
-      pendingOperations++;
-      insertCategoryStmt.run(category, (err: Error | null) => {
-        if (err) {
-          console.error(err.message);
-        }
-        pendingOperations--;
-        if (pendingOperations === 0) {
-          finalizeStatements();
-        }
-      });
-    }
+      if (row.count === 0) {
+        const initialSubreddits = ['r/politics', 'r/news', 'r/worldnews'];
+        const insertSubredditStmt = db.prepare('INSERT INTO blocked_subreddits (name) VALUES (?)');
+        statements.push(insertSubredditStmt);
 
-    // Insert initial blocked subreddits
-    const initialSubreddits = ['r/politics', 'r/news', 'r/worldnews'];
-    const insertSubredditStmt = db.prepare('INSERT INTO blocked_subreddits (name) VALUES (?)');
-
-    for (const subreddit of initialSubreddits) {
-      pendingOperations++;
-      insertSubredditStmt.run(subreddit, (err: Error | null) => {
-        if (err) {
-          console.error(err.message);
+        for (const subreddit of initialSubreddits) {
+          pendingOperations++;
+          insertSubredditStmt.run(subreddit, (err: Error | null) => {
+            if (err) {
+              console.error(err.message);
+            }
+            pendingOperations--;
+            checkAndFinalize();
+          });
         }
-        pendingOperations--;
-        if (pendingOperations === 0) {
-          finalizeStatements();
-        }
-      });
-    }
-
-    function finalizeStatements() {
-      insertKeywordStmt.finalize((err: Error | null) => {
-        if (err) {
-          console.error(err.message);
-        }
-      });
-
-      insertKeywordCategoryStmt.finalize((err: Error | null) => {
-        if (err) {
-          console.error(err.message);
-        }
-      });
-
-      insertCategoryStmt.finalize((err: Error | null) => {
-        if (err) {
-          console.error(err.message);
-        }
-      });
-
-      insertSubredditStmt.finalize((err: Error | null) => {
-        if (err) {
-          console.error(err.message);
-        }
-      });
-
-      db.close((err: Error | null) => {
-        if (err) {
-          console.error(err.message);
-        }
-        console.log('Closed the database connection. Database setup is complete.');
-      });
-    }
-
-    if (pendingOperations === 0) {
-      finalizeStatements();
-    }
+      }
+      tablesChecked++;
+      checkAndFinalize();
+    });
   });
 }
 

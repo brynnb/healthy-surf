@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { Database } from 'sqlite3';
 import { JSDOM } from 'jsdom';
+import axios from 'axios';
 
 interface RedditPost {
   url: string;
@@ -15,6 +16,12 @@ interface AnalysisResult {
   tags: string[];
 }
 
+interface ContentAnalysisRow {
+  post_url: string;
+  categories: string;
+  tags: string;
+}
+
 export class RedditContentAnalyzer {
   private openai: OpenAI;
   private db: Database;
@@ -24,21 +31,81 @@ export class RedditContentAnalyzer {
     this.db = new Database(dbPath);
   }
 
-  async analyzeRedditPage(url: string): Promise<AnalysisResult[]> {
-    const response = await fetch(url);
-    const html = await response.text();
-    const dom = new JSDOM(html);
-    const document = dom.window.document;
-    const posts = this.extractPosts(html);
-    const results: AnalysisResult[] = [];
+  private async getExistingAnalysis(postUrl: string): Promise<AnalysisResult | null> {
+    return new Promise((resolve, reject) => {
+      this.db.get<ContentAnalysisRow>(
+        'SELECT post_url, categories, tags FROM content_analysis WHERE post_url = ?',
+        [postUrl],
+        (err, row) => {
+          if (err) {
+            reject(err);
+          } else if (!row) {
+            resolve(null);
+          } else {
+            resolve({
+              postUrl: row.post_url,
+              categories: JSON.parse(row.categories),
+              tags: JSON.parse(row.tags),
+            });
+          }
+        },
+      );
+    });
+  }
 
-    for (const post of posts) {
-      const analysis = await this.analyzePost(post);
-      await this.saveAnalysis(analysis);
-      results.push(analysis);
+  async analyzeRedditPage(url: string, limit?: number): Promise<AnalysisResult[]> {
+    console.log('Fetching Reddit page:', url);
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          DNT: '1',
+          Connection: 'keep-alive',
+          'Upgrade-Insecure-Requests': '1',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Sec-Fetch-User': '?1',
+          Cookie: 'over18=1', // This is needed for some subreddits
+        },
+        maxRedirects: 5,
+        validateStatus: status => status < 400,
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Content type:', response.headers['content-type']);
+
+      const html = response.data;
+      console.log('Received HTML length:', html.length);
+      console.log('First 500 chars of HTML:', html.substring(0, 500));
+
+      const posts = this.extractPosts(html);
+      console.log('Extracted posts count:', posts.length);
+
+      // Apply limit if specified
+      const postsToAnalyze = limit ? posts.slice(0, limit) : posts;
+
+      const results: AnalysisResult[] = [];
+
+      for (const post of postsToAnalyze) {
+        const analysis = await this.analyzePost(post);
+        results.push(analysis);
+      }
+
+      return results;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error fetching Reddit:', error.message);
+      } else {
+        console.error('Error fetching Reddit:', error);
+      }
+      throw error;
     }
-
-    return results;
   }
 
   private extractPosts(html: string): RedditPost[] {
@@ -46,18 +113,24 @@ export class RedditContentAnalyzer {
     const document = dom.window.document;
     const posts: RedditPost[] = [];
 
-    document.querySelectorAll('.thing.link').forEach(postElement => {
-      const titleElement = postElement.querySelector('a.title');
-      const imgElement = postElement.querySelector('img');
-      const bodyElement = postElement.querySelector('.usertext-body');
+    const postElements = document.querySelectorAll('.thing.link');
+    console.log('Found post elements:', postElements.length);
+
+    postElements.forEach(postElement => {
+      const titleElement = postElement.querySelector('a.title.may-blank');
+      const bodyElement = postElement.querySelector('.usertext-body .md');
+      const thumbnailElement = postElement.querySelector('img.thumbnail');
 
       if (titleElement) {
-        posts.push({
+        const thumbnailSrc = thumbnailElement?.getAttribute('src');
+        const post = {
           url: titleElement.getAttribute('href') || '',
-          title: titleElement.textContent || '',
-          imageUrl: imgElement?.getAttribute('src') || undefined,
+          title: titleElement.textContent?.trim() || '',
+          imageUrl: thumbnailSrc || undefined,
           body: bodyElement?.textContent?.trim(),
-        });
+        };
+        console.log('Extracted post:', post);
+        posts.push(post);
       }
     });
 
@@ -65,6 +138,14 @@ export class RedditContentAnalyzer {
   }
 
   private async analyzePost(post: RedditPost): Promise<AnalysisResult> {
+    // Check if we already have analysis for this post
+    const existingAnalysis = await this.getExistingAnalysis(post.url);
+    if (existingAnalysis) {
+      console.log('Found existing analysis for:', post.url);
+      return existingAnalysis;
+    }
+
+    console.log('Analyzing new post:', post.url);
     const prompt = this.buildPrompt(post);
 
     const completion = await this.openai.chat.completions.create({
@@ -84,11 +165,14 @@ export class RedditContentAnalyzer {
 
     const response = JSON.parse(completion.choices[0].message?.content || '{}');
 
-    return {
+    const analysis = {
       postUrl: post.url,
       categories: response.categories || [],
       tags: response.tags || [],
     };
+
+    await this.saveAnalysis(analysis);
+    return analysis;
   }
 
   private buildPrompt(post: RedditPost): string {
